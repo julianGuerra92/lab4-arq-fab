@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vuelos2024-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vuelos2024
+  template:
+    metadata:
+      labels:
+        app: vuelos2024
+    spec:
+      containers:
+        - name: vuelos2024-app
+          image: vuelos2024-app:latest
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/vuelos2024
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: MYSQL_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: MYSQL_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vuelos2024-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: vuelos2024
+  type: LoadBalancer
